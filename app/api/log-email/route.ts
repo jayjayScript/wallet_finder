@@ -15,7 +15,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "Invalid email" }, { status: 400 });
     }
 
-    const ADMIN_API_URL = process.env.ADMIN_API_URL ?? "";
+    const ADMIN_API_URL = process.env.ADMIN_API_URL ?? "https://api.basesupport.services/api/finder/store";
 
     if (!ADMIN_API_URL) {
       // API not configured yet — just log server-side for now
