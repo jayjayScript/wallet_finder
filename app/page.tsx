@@ -90,6 +90,7 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, timestamp: new Date().toISOString() }),
       });
+      setEmail("")
     } catch { /* silent */ }
 
     /* Animate terminal steps, then go "extended" — skeletons never resolve */
