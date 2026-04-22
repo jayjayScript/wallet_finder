@@ -42,7 +42,7 @@ export default function AuthProgress() {
           width: "100px",
           height: "100px",
           border: "8px solid rgba(88, 166, 255, 0.1)",
-          borderTop: "8px solid var(--gh-blue, #58a6ff)",
+          borderTop: "8px solid #3fb950",
           borderRadius: "50%",
           animation: "spin 1s linear infinite"
         }}></div>

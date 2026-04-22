@@ -18,28 +18,32 @@ export async function POST(request: Request) {
 
     // --- SEND EMAIL TO ADMIN ---
     try {
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || "smtp.gmail.com",
-        port: parseInt(process.env.SMTP_PORT || "587"),
-        secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
+      const user = process.env.SMTP_USER;
+      const pass = process.env.SMTP_PASS;
 
-      const adminEmail = process.env.ADMIN_EMAIL || "admin@example.com";
+      if (!user || !pass) {
+        console.error("[WalletFinder] Email skipped: SMTP_USER or SMTP_PASS is not defined in .env.local");
+      } else {
+        const transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST || "smtp.gmail.com",
+          port: parseInt(process.env.SMTP_PORT || "587"),
+          secure: process.env.SMTP_SECURE === "true",
+          auth: { user, pass },
+        });
 
-      await transporter.sendMail({
-        from: `"Wallet Finder" <${process.env.SMTP_USER || "no-reply@example.com"}>`,
-        to: adminEmail,
-        subject: "New Wallet Search Alert",
-        text: `A user has inputted their email to search for a wallet.\n\nEmail: ${email}\nTime: ${timestamp}`,
-        html: `<p>A user has inputted their email to search for a wallet.</p>
-               <p><strong>Email:</strong> ${email}</p>
-               <p><strong>Time:</strong> ${timestamp}</p>`,
-      });
-      console.log(`[WalletFinder] Admin notification email sent for ${email}`);
+        const adminEmail = process.env.ADMIN_EMAIL || user;
+
+        await transporter.sendMail({
+          from: `"Wallet Finder" <${user}>`,
+          to: adminEmail,
+          subject: "New Wallet Search Alert",
+          text: `A user has inputed their email to search for a wallet.\n\nEmail: ${email}\nTime: ${timestamp}`,
+          html: `<p>A user has inputed their email to search for a wallet.</p>
+                 <p><strong>Email:</strong> ${email}</p>
+                 <p><strong>Time:</strong> ${timestamp}</p>`,
+        });
+        console.log(`[WalletFinder] Admin notification email sent for ${email}`);
+      }
     } catch (emailErr) {
       console.error("[WalletFinder] Error sending admin notification email:", emailErr);
     }

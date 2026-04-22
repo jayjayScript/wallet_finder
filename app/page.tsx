@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useSyncExternalStore } from "react";
 import Image from "next/image"
 import Link from "next/link"
 
@@ -251,14 +251,24 @@ const SCAN_STEPS = [
   "Running extended deep scan...",
 ];
 
+const emptySubscribe = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
+
 /* ══════════════════════════ MAIN ══════════════════════════ */
 export default function Home() {
   const [email, setEmail] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [scannedEmail, setScannedEmail] = useState("");
   const [logStep, setLogStep] = useState(0);
   const [terminalDone, setTerminalDone] = useState(false);
   const [activeTab, setActiveTab] = useState<WalletType>("exchange");
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    getClientSnapshot,
+    getServerSnapshot,
+  );
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
@@ -268,6 +278,11 @@ export default function Home() {
       inputRef.current?.focus();
       return;
     }
+
+    setIsSearching(true);
+    // Simulate initialization delay
+    await new Promise((r) => setTimeout(r, 2000));
+    setIsSearching(false);
 
     setHasSearched(true);
     setScannedEmail(email);
@@ -487,7 +502,7 @@ export default function Home() {
             <button
               id="find-btn"
               onClick={handleSearch}
-              disabled={!email}
+              disabled={!mounted || !email || isSearching}
               className="gh-btn-primary"
               style={{
                 padding: "0 24px",
@@ -495,9 +510,11 @@ export default function Home() {
                 fontSize: 14,
                 whiteSpace: "nowrap",
                 minWidth: 110,
+                opacity: isSearching ? 0.7 : 1,
+                cursor: isSearching ? "not-allowed" : "pointer"
               }}
             >
-              Find Wallets
+              {isSearching ? "Searching..." : "Find Wallets"}
             </button>
           </div>
           <p
